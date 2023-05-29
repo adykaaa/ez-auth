@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "pgpass123"
+      POSTGRES_DB: "notes"
+    ports:
+      - 5432:5432
