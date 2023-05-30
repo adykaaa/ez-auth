@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE Users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT,
+    username TEXT UNIQUE,
     email TEXT UNIQUE,
     email_verified TIMESTAMP,
     image TEXT
