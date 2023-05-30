@@ -22,3 +22,9 @@ CREATE TABLE Accounts (
     id_token TEXT,
     session_state TEXT
 );
+
+CREATE TABLE UserRefreshTokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES Users(id) ON DELETE CASCADE,
+    refresh_token TEXT
+);

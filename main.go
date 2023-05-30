@@ -1,11 +1,13 @@
 package main
 
 import (
+	"adykaaa/ez-auth/config"
 	"adykaaa/ez-auth/db"
 	"adykaaa/ez-auth/logger"
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
@@ -24,6 +26,10 @@ var googleOauthConfig = &oauth2.Config{
 
 func main() {
 	l := logger.New(zerolog.InfoLevel.String())
+	config, err := config.Load(".")
+	if err != nil {
+		log.Fatalf("Could not load config. %v", err)
+	}
 
 	sqldb, err := db.NewSQL("postgres", config.DBConnString, &l)
 	if err != nil {
