@@ -15,6 +15,7 @@ type Config struct {
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 	RedisAddress         string        `mapstructure:"REDIS_CONN_STRING"`
 	RedisPassword        string        `mapstructure:"REDIS_PW"`
+	RedirectURL          string        `mapstructure:"REDIRECT_URL"`
 }
 
 // Load reads configuration from file or environment variables.
