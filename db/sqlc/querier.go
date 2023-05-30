@@ -12,7 +12,17 @@ import (
 )
 
 type Querier interface {
+	CreateAccount(ctx context.Context, arg *CreateAccountParams) (uuid.NullUUID, error)
+	CreateRefreshToken(ctx context.Context, arg *CreateRefreshTokenParams) (uuid.NullUUID, error)
 	CreateUser(ctx context.Context, arg *CreateUserParams) (sql.NullString, error)
+	DeleteRefreshToken(ctx context.Context, userID uuid.NullUUID) (uuid.NullUUID, error)
+	DeleteUser(ctx context.Context, username sql.NullString) (sql.NullString, error)
+	GetAllAccountsFromUser(ctx context.Context, username sql.NullString) ([]GetAllAccountsFromUserRow, error)
+	GetAllUsers(ctx context.Context) ([]User, error)
+	GetRefreshToken(ctx context.Context, userID uuid.NullUUID) (Userrefreshtoken, error)
+	GetUser(ctx context.Context, username sql.NullString) (User, error)
+	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) (uuid.UUID, error)
+	UpdateRefreshToken(ctx context.Context, refreshToken sql.NullString) (uuid.NullUUID, error)
 	UpdateUser(ctx context.Context, arg *UpdateUserParams) (uuid.UUID, error)
 }
 

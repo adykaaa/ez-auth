@@ -16,13 +16,11 @@ RETURNING id;
 -- name: GetUser :one
 SELECT *
 FROM Users
-WHERE username = $1
-RETURNING *;
+WHERE username = $1;
 
 -- name: GetAllUsers :many
 SELECT *
-FROM Users
-RETURNING *;
+FROM Users;
 
 -- name: DeleteUser :one
 DELETE
@@ -66,8 +64,7 @@ RETURNING user_id;
 
 -- name: UpdateRefreshToken :one
 UPDATE UserRefreshTokens
-WHERE user_id = $1
-SET refresh_token = $2
+SET refresh_token = $1
 RETURNING user_id;
 
 -- name: DeleteRefreshToken :one
@@ -79,5 +76,4 @@ RETURNING user_id;
 -- name: GetRefreshToken :one
 SELECT *
 FROM UserRefreshTokens
-WHERE user_id = $1
-RETURNING *;
+WHERE user_id = $1;

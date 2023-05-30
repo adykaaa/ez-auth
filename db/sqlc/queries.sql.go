@@ -12,6 +12,63 @@ import (
 	"github.com/google/uuid"
 )
 
+const createAccount = `-- name: CreateAccount :one
+INSERT INTO Accounts (user_id, type, provider, provider_account_id, refresh_token, access_token, expires_at, token_type, scope, id_token, session_state)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+RETURNING user_id
+`
+
+type CreateAccountParams struct {
+	UserID            uuid.NullUUID
+	Type              sql.NullString
+	Provider          sql.NullString
+	ProviderAccountID sql.NullString
+	RefreshToken      sql.NullString
+	AccessToken       sql.NullString
+	ExpiresAt         sql.NullTime
+	TokenType         sql.NullString
+	Scope             sql.NullString
+	IDToken           sql.NullString
+	SessionState      sql.NullString
+}
+
+func (q *Queries) CreateAccount(ctx context.Context, arg *CreateAccountParams) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, createAccount,
+		arg.UserID,
+		arg.Type,
+		arg.Provider,
+		arg.ProviderAccountID,
+		arg.RefreshToken,
+		arg.AccessToken,
+		arg.ExpiresAt,
+		arg.TokenType,
+		arg.Scope,
+		arg.IDToken,
+		arg.SessionState,
+	)
+	var user_id uuid.NullUUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const createRefreshToken = `-- name: CreateRefreshToken :one
+INSERT INTO UserRefreshTokens (user_id, refresh_token)
+VALUES ($1,$2)
+RETURNING user_id
+`
+
+type CreateRefreshTokenParams struct {
+	UserID       uuid.NullUUID
+	RefreshToken sql.NullString
+}
+
+func (q *Queries) CreateRefreshToken(ctx context.Context, arg *CreateRefreshTokenParams) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, createRefreshToken, arg.UserID, arg.RefreshToken)
+	var user_id uuid.NullUUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO Users (username, email, email_verified, image)
 VALUES ($1,$2,$3,$4)
@@ -35,6 +92,232 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (sql.Nu
 	var username sql.NullString
 	err := row.Scan(&username)
 	return username, err
+}
+
+const deleteRefreshToken = `-- name: DeleteRefreshToken :one
+DELETE
+FROM UserRefreshTokens
+WHERE user_id = $1
+RETURNING user_id
+`
+
+func (q *Queries) DeleteRefreshToken(ctx context.Context, userID uuid.NullUUID) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, deleteRefreshToken, userID)
+	var user_id uuid.NullUUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const deleteUser = `-- name: DeleteUser :one
+DELETE
+FROM Users
+WHERE username = $1
+RETURNING username
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, username sql.NullString) (sql.NullString, error) {
+	row := q.db.QueryRowContext(ctx, deleteUser, username)
+	err := row.Scan(&username)
+	return username, err
+}
+
+const getAllAccountsFromUser = `-- name: GetAllAccountsFromUser :many
+SELECT accounts.id, user_id, type, provider, provider_account_id, refresh_token, access_token, expires_at, token_type, scope, id_token, session_state, users.id, username, email, email_verified, image
+FROM Accounts
+JOIN Users
+ON Accounts.user_id = Users.id
+WHERE Users.username = $1
+`
+
+type GetAllAccountsFromUserRow struct {
+	ID                uuid.UUID
+	UserID            uuid.NullUUID
+	Type              sql.NullString
+	Provider          sql.NullString
+	ProviderAccountID sql.NullString
+	RefreshToken      sql.NullString
+	AccessToken       sql.NullString
+	ExpiresAt         sql.NullTime
+	TokenType         sql.NullString
+	Scope             sql.NullString
+	IDToken           sql.NullString
+	SessionState      sql.NullString
+	ID_2              uuid.UUID
+	Username          sql.NullString
+	Email             sql.NullString
+	EmailVerified     sql.NullTime
+	Image             sql.NullString
+}
+
+func (q *Queries) GetAllAccountsFromUser(ctx context.Context, username sql.NullString) ([]GetAllAccountsFromUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllAccountsFromUser, username)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllAccountsFromUserRow{}
+	for rows.Next() {
+		var i GetAllAccountsFromUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Type,
+			&i.Provider,
+			&i.ProviderAccountID,
+			&i.RefreshToken,
+			&i.AccessToken,
+			&i.ExpiresAt,
+			&i.TokenType,
+			&i.Scope,
+			&i.IDToken,
+			&i.SessionState,
+			&i.ID_2,
+			&i.Username,
+			&i.Email,
+			&i.EmailVerified,
+			&i.Image,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, username, email, email_verified, image
+FROM Users
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.EmailVerified,
+			&i.Image,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRefreshToken = `-- name: GetRefreshToken :one
+SELECT id, user_id, refresh_token
+FROM UserRefreshTokens
+WHERE user_id = $1
+`
+
+func (q *Queries) GetRefreshToken(ctx context.Context, userID uuid.NullUUID) (Userrefreshtoken, error) {
+	row := q.db.QueryRowContext(ctx, getRefreshToken, userID)
+	var i Userrefreshtoken
+	err := row.Scan(&i.ID, &i.UserID, &i.RefreshToken)
+	return i, err
+}
+
+const getUser = `-- name: GetUser :one
+SELECT id, username, email, email_verified, image
+FROM Users
+WHERE username = $1
+`
+
+func (q *Queries) GetUser(ctx context.Context, username sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
+	)
+	return i, err
+}
+
+const updateAccount = `-- name: UpdateAccount :one
+UPDATE Accounts
+SET
+  type = COALESCE($2, type),
+  provider = COALESCE($3, provider),
+  provider_account_id = COALESCE($4, provider_account_id),
+  refresh_token = COALESCE($5, refresh_token),
+  access_token = COALESCE($6, access_token),
+  expires_at = COALESCE($7, expires_at),
+  token_type = COALESCE($8, token_type),
+  scope = COALESCE($9, scope),
+  id_token = COALESCE($10, id_token),
+  session_state = COALESCE($11, session_state)
+WHERE
+  user_id = $1
+RETURNING id
+`
+
+type UpdateAccountParams struct {
+	UserID            uuid.NullUUID
+	Type              sql.NullString
+	Provider          sql.NullString
+	ProviderAccountID sql.NullString
+	RefreshToken      sql.NullString
+	AccessToken       sql.NullString
+	ExpiresAt         sql.NullTime
+	TokenType         sql.NullString
+	Scope             sql.NullString
+	IDToken           sql.NullString
+	SessionState      sql.NullString
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg *UpdateAccountParams) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, updateAccount,
+		arg.UserID,
+		arg.Type,
+		arg.Provider,
+		arg.ProviderAccountID,
+		arg.RefreshToken,
+		arg.AccessToken,
+		arg.ExpiresAt,
+		arg.TokenType,
+		arg.Scope,
+		arg.IDToken,
+		arg.SessionState,
+	)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const updateRefreshToken = `-- name: UpdateRefreshToken :one
+UPDATE UserRefreshTokens
+SET refresh_token = $1
+RETURNING user_id
+`
+
+func (q *Queries) UpdateRefreshToken(ctx context.Context, refreshToken sql.NullString) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, updateRefreshToken, refreshToken)
+	var user_id uuid.NullUUID
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const updateUser = `-- name: UpdateUser :one
