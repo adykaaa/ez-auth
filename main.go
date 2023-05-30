@@ -1,12 +1,15 @@
 package main
 
 import (
+	"adykaaa/ez-auth/db"
+	"adykaaa/ez-auth/logger"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 
+	"github.com/rs/zerolog"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -20,6 +23,18 @@ var googleOauthConfig = &oauth2.Config{
 }
 
 func main() {
+	l := logger.New(zerolog.InfoLevel.String())
+
+	sqldb, err := db.NewSQL("postgres", config.DBConnString, &l)
+	if err != nil {
+		l.Fatal().Err(err).Send()
+	}
+
+	err = db.MigrateDB(config.DBConnString, "file://db/migrations/", &l)
+	if err != nil {
+		l.Fatal().Err(err).Send()
+	}
+
 	http.HandleFunc("/", handleHome)
 	http.HandleFunc("/login", handleGoogleLogin)
 	http.HandleFunc("/auth/callback", handleGoogleCallback)
