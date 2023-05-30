@@ -1,10 +1,10 @@
 package db
 
 import (
+	sqlc "adykaaa/ez-auth/db/sqlc"
 	"database/sql"
 	"time"
 
-	sqlc "github.com/adykaaa/ez-auth/db/sqlc"
 	"github.com/rs/zerolog"
 )
 
