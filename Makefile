@@ -25,7 +25,7 @@ dbmock: # Generates the DB mocks
 	mockgen -package mockdb -destination db/mock/querier.go  github.com/adykaaa/ez-auth/db/sqlc Querier
 .PHONY: dbmock
 
-run: # Runs ez-auth inside a Docker container
+run: # Builds and runs ez-auth inside a Docker container
 	docker build . -t ezauth
 	docker run ezauth -d -p 8080:8080
 .PHONY: run
