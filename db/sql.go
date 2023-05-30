@@ -27,7 +27,6 @@ func NewSQL(driver string, url string, l *zerolog.Logger) (*sqlDB, error) {
 		connTimeout:  defaultConnTimeout,
 		logger:       l,
 	}
-
 	var err error
 
 	for sqlDB.connAttempts > 0 {
@@ -53,8 +52,8 @@ func NewSQL(driver string, url string, l *zerolog.Logger) (*sqlDB, error) {
 			return nil, err
 		}
 	}
-
 	sqlDB.Queries = sqlc.New(sqlDB.db)
+
 	l.Info().Msg("db connection is successful.")
 	return sqlDB, nil
 }
