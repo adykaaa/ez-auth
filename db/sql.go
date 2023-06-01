@@ -21,6 +21,7 @@ type sqlDB struct {
 	connTimeout  time.Duration
 }
 
+// NewSQL opens a connection to the specified database in the url
 func NewSQL(driver string, url string, l *zerolog.Logger) (*sqlDB, error) {
 	sqlDB := &sqlDB{
 		connAttempts: defaultConnAttempts,

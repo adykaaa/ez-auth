@@ -8,11 +8,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Handler holds the Oauth configuration and the UserInfoURL that has the information about a particular user
 type Handler struct {
 	OauthConfig *oauth2.Config
 	UserInfoURL string
 }
 
+// ProviderData has all the necessary information that allows ez-auth to get profile information
 type ProviderData struct {
 	RedirectURL  string
 	ClientID     string
@@ -35,19 +37,22 @@ func NewHandler(data ProviderData) *Handler {
 	}
 }
 
+// GetAuthURL returns the authentication URL for providers
 func (h *Handler) GetAuthURL() string {
 	return h.OauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 }
 
+// GetToken returns the Token struct that holds the Access and Refresh tokens for OAuth
 func (h *Handler) GetToken(ctx context.Context, authCode string) (*oauth2.Token, error) {
 	token, err := h.OauthConfig.Exchange(ctx, authCode)
 	if err != nil {
-		return nil, fmt.Errorf("error during authorization code exchange. %v", err)
+		return nil, fmt.Errorf("error during authorization code to token exchange. %v", err)
 	}
 
 	return token, nil
 }
 
+// GetAccountInfo returns all the information about a specified account
 func (h *Handler) GetAccountInfo(ctx context.Context, token *oauth2.Token) (*http.Response, error) {
 	var err error
 
