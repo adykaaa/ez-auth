@@ -37,13 +37,8 @@ func NewHandler(data ProviderData) *Handler {
 	}
 }
 
-// GetAuthURL returns the authentication URL for providers
-func (h *Handler) GetAuthURL() string {
-	return h.OauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
-}
-
-// GetToken returns the Token struct that holds the Access and Refresh tokens for OAuth
-func (h *Handler) GetToken(ctx context.Context, authCode string) (*oauth2.Token, error) {
+// getToken returns the Token struct that holds the Access and Refresh tokens for OAuth
+func (h *Handler) getToken(ctx context.Context, authCode string) (*oauth2.Token, error) {
 	token, err := h.OauthConfig.Exchange(ctx, authCode)
 	if err != nil {
 		return nil, fmt.Errorf("error during authorization code to token exchange. %v", err)
@@ -52,11 +47,21 @@ func (h *Handler) GetToken(ctx context.Context, authCode string) (*oauth2.Token,
 	return token, nil
 }
 
+// GetAuthURL returns the authentication URL for providers
+func (h *Handler) GetAuthURL() string {
+	return h.OauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+}
+
 // GetAccountInfo returns all the information about a specified account
-func (h *Handler) GetAccountInfo(ctx context.Context, token *oauth2.Token) (*http.Response, error) {
+func (h *Handler) GetAccountInfo(ctx context.Context, authCode string, token *oauth2.Token) (*http.Response, error) {
 	var err error
 
-	c := oauth2.NewClient(ctx, h.OauthConfig.TokenSource(ctx, token))
+	t, err := h.getToken(ctx, authCode)
+	if err != nil {
+		return nil, err
+	}
+
+	c := oauth2.NewClient(ctx, h.OauthConfig.TokenSource(ctx, t))
 	resp, err := c.Get(h.UserInfoURL)
 	if err != nil {
 		return nil, fmt.Errorf("could not get user information. %v", err)

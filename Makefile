@@ -1,5 +1,5 @@
 include .env
-export
+export $(shell sed 's/=.*//' .env)
 
 help: # Show help for each of the Makefile recipes.
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
@@ -27,7 +27,7 @@ dbmock: # Generates the DB mocks
 
 run: # Builds and runs ez-auth inside a Docker container
 	docker build . -t ezauth
-	docker run ezauth -d -p 8080:8080
+	docker run ezauth -d -p $(HTTP_SERVER_ADDRESS):$(HTTP_SERVER_ADDRESS)
 .PHONY: run
 
 run-all: # Runs the docker compose file with all the services necessary for the application

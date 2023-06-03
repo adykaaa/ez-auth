@@ -45,6 +45,7 @@ func NewServer(r Router, addr string, l *zerolog.Logger) (*Server, error) {
 
 func (s *Server) Start() {
 	go func() {
+		s.l.Info().Msgf("starting HTTP server with the address %s", s.s.Addr)
 		s.notify <- s.s.ListenAndServe()
 		close(s.notify)
 	}()
