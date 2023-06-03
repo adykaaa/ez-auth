@@ -1,4 +1,4 @@
-package oauth2
+package oauth
 
 import (
 	"context"
@@ -53,7 +53,7 @@ func (h *Handler) GetAuthURL() string {
 }
 
 // GetAccountInfo returns all the information about a specified account
-func (h *Handler) GetAccountInfo(ctx context.Context, authCode string, token *oauth2.Token) (*http.Response, error) {
+func (h *Handler) GetAccountInfo(ctx context.Context, authCode string) (*http.Response, error) {
 	var err error
 
 	t, err := h.getToken(ctx, authCode)

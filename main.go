@@ -3,14 +3,32 @@ package main
 import (
 	"adykaaa/ez-auth/config"
 	"adykaaa/ez-auth/db"
+	"adykaaa/ez-auth/http"
 	"adykaaa/ez-auth/logger"
+	"adykaaa/ez-auth/oauth"
 	"log"
+	"os"
 
+	"github.com/go-chi/chi"
 	"github.com/rs/zerolog"
+	"golang.org/x/oauth2/google"
 )
 
 func main() {
 	l := logger.New(zerolog.InfoLevel.String())
+	h := oauth.NewHandler(oauth.ProviderData{
+		RedirectURL:  "http://localhost:8080/auth/callback/google",
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+		UserInfoURL:  "https://www.googleapis.com/oauth2/v3/userinfo",
+	})
+
+	r := chi.NewRouter()
+	r.Get("/", http.HandleHome)
+	r.Get("/handleLogin", http.HandleLogin(h))
+	r.Get("/handleCallback", http.HandleCallback(h))
 
 	config, err := config.Load(".")
 	if err != nil {
@@ -27,4 +45,13 @@ func main() {
 		l.Fatal().Err(err).Send()
 	}
 
+	srv, err := http.NewServer(r, config.HTTPServerAddress, &l)
+	if err != nil {
+		l.Fatal().Msgf("could not initiate new HTTP server %v", err)
+	}
+
+	err = srv.Shutdown()
+	if err != nil {
+		l.Fatal().Msgf("error during server shutdown %v", err)
+	}
 }

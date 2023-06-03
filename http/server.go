@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -21,6 +22,26 @@ type Server struct {
 	s               *http.Server
 	notify          chan error
 	shutdownTimeout time.Duration
+}
+
+type msg map[string]string
+
+func JSON(w http.ResponseWriter, payload interface{}, code int) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("internal server error while marshaling for the response"))
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+func SetupHandler(w http.ResponseWriter, ctx context.Context) (*zerolog.Logger, context.Context, context.CancelFunc) {
+	w.Header().Set("Content-Type", "application/json")
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	l := zerolog.Ctx(ctx)
+	return l, ctx, cancel
 }
 
 func NewServer(r Router, addr string, l *zerolog.Logger) (*Server, error) {
