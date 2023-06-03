@@ -17,7 +17,7 @@ import (
 func main() {
 	l := logger.New(zerolog.InfoLevel.String())
 	h := oauth.NewHandler(oauth.ProviderData{
-		RedirectURL:  "http://localhost:8080/auth/callback/google",
+		RedirectURL:  "http://localhost:8080/auth/callback",
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
@@ -28,7 +28,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Get("/", http.HandleHome)
 	r.Get("/handleLogin", http.HandleLogin(h))
-	r.Get("/handleCallback", http.HandleCallback(h))
+	r.Get("/auth/callback", http.HandleCallback(h))
 
 	config, err := config.Load(".")
 	if err != nil {
