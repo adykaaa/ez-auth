@@ -38,7 +38,7 @@ type GithubConfig struct {
 	Scopes       string `mapstructure:"GITHUB_SCOPES"`
 }
 
-// Load loads the environment variables into the config struct
+// Load loads the environment variables into the config structs
 func Load(path string) (ac AppConfig, goc GoogleConfig, fc FacebookConfig, ghc GithubConfig, err error) {
 
 	viper.AddConfigPath(path)

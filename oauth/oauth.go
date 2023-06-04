@@ -37,6 +37,11 @@ func NewHandler(data ProviderData) *Handler {
 	}
 }
 
+func parseScopes(scopes string) []string {
+	var s []string
+
+}
+
 // getToken returns the Token struct that holds the Access and Refresh tokens for OAuth
 func (h *Handler) getToken(ctx context.Context, authCode string) (*oauth2.Token, error) {
 	token, err := h.OauthConfig.Exchange(ctx, authCode)
@@ -76,36 +81,3 @@ func (h *Handler) GetAccountInfo(ctx context.Context, authCode string) (*http.Re
 
 	return resp, err
 }
-
-/* func (h *Handler) HandleLogin() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		url := h.OauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-	}
-}
-
-func (h *Handler) HandleCallback() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		code := r.FormValue("code")
-		token, err := h.OauthConfig.Exchange(context.Background(), code)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		client := oauth2.NewClient(context.Background(), h.OauthConfig.TokenSource(context.Background(), token))
-		response, err := client.Get(h.UserInfoURL)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer response.Body.Close()
-
-		content, err := io.ReadAll(response.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprintf(w, "Response: %s", content)
-	}
-} */
