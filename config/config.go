@@ -39,21 +39,39 @@ type GithubConfig struct {
 }
 
 // Load loads the environment variables into the config struct
-func Load(path string) (config AppConfig, err error) {
+func Load(path string) (ac AppConfig, goc GoogleConfig, fc FacebookConfig, ghc GithubConfig, err error) {
+
 	viper.AddConfigPath(path)
+	viper.AutomaticEnv()
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 
-	viper.AutomaticEnv()
-
 	err = viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Viper couldn't read in the config file. %v", err)
+		log.Fatalf("couldn't read in the config file. %v", err)
 	}
 
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		log.Fatalf("Viper could not unmarshal the configuration. %v", err)
+	var appConfig AppConfig
+	if err := viper.Unmarshal(&appConfig); err != nil {
+		log.Fatalf("unable to unmarshal values to appConfig, %v", err)
 	}
-	return
+
+	var googleConfig GoogleConfig
+	if err := viper.Unmarshal(&googleConfig); err != nil {
+		log.Fatalf("unable to unmarshal values to googleConfig, %v", err)
+	}
+
+	var facebookConfig FacebookConfig
+	if err := viper.Unmarshal(&facebookConfig); err != nil {
+		log.Fatalf("unable to unmarshal values to facebookConfig, %v", err)
+	}
+
+	var githubConfig GithubConfig
+	if err := viper.Unmarshal(&githubConfig); err != nil {
+		log.Fatalf("unable to unmarshal values to githubConfig, %v", err)
+	}
+
+	viper.WatchConfig()
+
+	return appConfig, googleConfig, facebookConfig, githubConfig, err
 }

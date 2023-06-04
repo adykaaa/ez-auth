@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	config, err := config.Load(".")
+	config, gc, _, _, err := config.Load(".")
 	if err != nil {
 		log.Fatalf("Could not load config. %v", err)
 	}
@@ -22,8 +22,8 @@ func main() {
 	l := logger.New(config.LogLevel)
 
 	h := oauth.NewHandler(oauth.ProviderData{
-		RedirectURL:  config.RedirectURL,
-		ClientID:     config.ClientID,
+		RedirectURL:  gc.RedirectURL,
+		ClientID:     gc.ClientID,
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
