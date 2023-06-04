@@ -40,7 +40,7 @@ func HandleCallback(h OAuthHandler) http.HandlerFunc {
 		info, err := h.GetAccountInfo(ctx, code)
 		if err != nil {
 			l.Error().Msgf("error fetching account info %v", err)
-			JSON(w, msg{"error": "fetching account info"}, http.StatusInternalServerError)
+			JSON(w, msg{"error": "fetching account info %s"}, http.StatusInternalServerError)
 			return
 		}
 

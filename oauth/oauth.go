@@ -67,12 +67,12 @@ func (h *Handler) GetAccountInfo(ctx context.Context, authCode string) (*http.Re
 		return nil, fmt.Errorf("could not get user information. %v", err)
 	}
 
-	defer func() {
+	/* 	defer func() {
 		closeErr := resp.Body.Close()
 		if closeErr != nil && err == nil {
 			err = closeErr
 		}
-	}()
+	}() */
 
 	return resp, err
 }

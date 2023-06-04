@@ -10,15 +10,20 @@ import (
 	"os"
 
 	"github.com/go-chi/chi"
-	"github.com/rs/zerolog"
 	"golang.org/x/oauth2/google"
 )
 
 func main() {
-	l := logger.New(zerolog.InfoLevel.String())
+	config, err := config.Load(".")
+	if err != nil {
+		log.Fatalf("Could not load config. %v", err)
+	}
+
+	l := logger.New(config.LogLevel)
+
 	h := oauth.NewHandler(oauth.ProviderData{
-		RedirectURL:  "http://localhost:8080/auth/callback",
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		RedirectURL:  config.RedirectURL,
+		ClientID:     config.ClientID,
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
@@ -29,11 +34,6 @@ func main() {
 	r.Get("/", http.HandleHome)
 	r.Get("/handleLogin", http.HandleLogin(h))
 	r.Get("/auth/callback", http.HandleCallback(h))
-
-	config, err := config.Load(".")
-	if err != nil {
-		log.Fatalf("Could not load config. %v", err)
-	}
 
 	_, err = db.NewSQL("postgres", config.DBConnString, &l)
 	if err != nil {
