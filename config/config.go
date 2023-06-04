@@ -18,24 +18,27 @@ type AppConfig struct {
 }
 
 type GoogleConfig struct {
-	RedirectURL  string `mapstructure:"GOOGLE_REDIRECT_URL"`
+	RedirectURL  string `mapstructure:"GOOGLE_REDIRECT_ROUTE"`
 	ClientID     string `mapstructure:"GOOGLE_CLIENT_ID"`
 	ClientSecret string `mapstructure:"GOOGLE_CLIENT_SECRET"`
 	Scopes       string `mapstructure:"GOOGLE_SCOPES"`
+	LoginRoute   string `mapstructure:"GOOGLE_LOGIN_ROUTE"`
 }
 
 type FacebookConfig struct {
-	RedirectURL  string `mapstructure:"FACEBOOK_REDIRECT_URL"`
+	RedirectURL  string `mapstructure:"FACEBOOK_REDIRECT_ROUTE"`
 	ClientID     string `mapstructure:"FACEBOOK_CLIENT_ID"`
 	ClientSecret string `mapstructure:"FACEBOOK_CLIENT_SECRET"`
 	Scopes       string `mapstructure:"FACEBOOK_SCOPES"`
+	LoginRoute   string `mapstructure:"FACEBOOK_LOGIN_ROUTE"`
 }
 
 type GithubConfig struct {
-	RedirectURL  string `mapstructure:"GITHUB_REDIRECT_URL"`
+	RedirectURL  string `mapstructure:"GITHUB_REDIRECT_ROUTE"`
 	ClientID     string `mapstructure:"GITHUB_CLIENT_ID"`
 	ClientSecret string `mapstructure:"GITHUB_CLIENT_SECRET"`
 	Scopes       string `mapstructure:"GITHUB_SCOPES"`
+	LoginRoute   string `mapstructure:"GITHUB_LOGIN_ROUTE"`
 }
 
 // Load loads the environment variables into the config structs

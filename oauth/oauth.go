@@ -37,11 +37,6 @@ func NewHandler(data ProviderData) *Handler {
 	}
 }
 
-func parseScopes(scopes string) []string {
-	var s []string
-
-}
-
 // getToken returns the Token struct that holds the Access and Refresh tokens for OAuth
 func (h *Handler) getToken(ctx context.Context, authCode string) (*oauth2.Token, error) {
 	token, err := h.OauthConfig.Exchange(ctx, authCode)

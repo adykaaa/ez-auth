@@ -7,7 +7,7 @@ import (
 	"adykaaa/ez-auth/logger"
 	"adykaaa/ez-auth/oauth"
 	"log"
-	"os"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"golang.org/x/oauth2/google"
@@ -24,8 +24,8 @@ func main() {
 	h := oauth.NewHandler(oauth.ProviderData{
 		RedirectURL:  gc.RedirectURL,
 		ClientID:     gc.ClientID,
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
+		ClientSecret: gc.ClientSecret,
+		Scopes:       strings.Split(gc.Scopes, ","),
 		Endpoint:     google.Endpoint,
 		UserInfoURL:  "https://www.googleapis.com/oauth2/v3/userinfo",
 	})
